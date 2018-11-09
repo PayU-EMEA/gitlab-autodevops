@@ -599,6 +599,7 @@ rollout 100%:
       --set nameOverride="$CI_PROJECT_NAME" \
       --set fullnameOverride="$name" \
       --set service.url="$url" \
+      --set service.healthCheckEndpoint="${APP_HEALTH_CHECK_ENDPOINT:-/}" \
       --set image.repository="$CI_APPLICATION_REPOSITORY" \
       --set image.tag="$CI_APPLICATION_TAG" \
       --set replicaCount="$replicas" \

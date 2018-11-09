@@ -20,6 +20,7 @@ service:
   host: my.host.com
   externalPort: 5000
   internalPort: 5000
+  healthCheckEndpoint: /
 
 ingress:
   enabled: true
