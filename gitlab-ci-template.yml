@@ -594,17 +594,22 @@ rollout 100%:
 
     url=$(generate_service_url)
 
+    if ! [ -e values.yaml ]; then
+      touch values.yaml
+    fi
+
     helm upgrade --install \
       --wait \
       --set nameOverride="$CI_PROJECT_NAME" \
       --set fullnameOverride="$name" \
       --set service.url="$url" \
-      --set service.healthCheckEndpoint="${APP_HEALTH_CHECK_ENDPOINT:-/}" \
       --set image.repository="$CI_APPLICATION_REPOSITORY" \
       --set image.tag="$CI_APPLICATION_TAG" \
       --set replicaCount="$replicas" \
-      --set image.env[0].name="ENVIRONMENT" --set image.env[0].value="$CI_ENVIRONMENT_SLUG" \
+      --set image.env[0].name="ENVIRONMENT" \
+      --set image.env[0].value="$CI_ENVIRONMENT_SLUG" \
       --namespace="$KUBE_NAMESPACE" \
+      -f values.yaml \
       "$name" \
       chart/
 
