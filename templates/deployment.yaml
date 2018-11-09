@@ -27,6 +27,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
 {{ toYaml .Values.image.env | indent 12 }}
+{{ toYaml .Values.image.customEnv | indent 12 }}
           ports:
             - name: "{{ .Values.service.name }}"
               containerPort: {{ .Values.service.internalPort }}
