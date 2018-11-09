@@ -70,7 +70,7 @@ stages:
 build:
   stage: build
   tags:
-    - build-on-staging
+  - build-on-staging
   image: docker:stable-git
   services:
   - docker:stable-dind

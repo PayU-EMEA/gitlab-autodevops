@@ -1,6 +1,6 @@
 replicaCount: 1
 
-# To avoid inconsistency 'image.env' should be set by gitlab-ci-template, 'image.customEnv' should be set in project specific values.yaml
+  # To avoid inconsistency image.env should be set by gitlab-ci-template, image.customEnv should be set in project specific values.yaml
 
 image:
   repository: nginx
