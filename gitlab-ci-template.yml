@@ -661,7 +661,7 @@ rollout 100%:
     helm init --client-only
 
     helm fetch https://github.com/PayU/gitlab-autodevops/archive/master.zip
-    unzip gitlab-autodevops-master.zip
+    unzip master.zip
 
     mv gitlab-autodevops-master chart
 
