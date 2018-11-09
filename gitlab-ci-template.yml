@@ -69,6 +69,8 @@ stages:
 
 build:
   stage: build
+  tags:
+    - build-on-staging
   image: docker:stable-git
   services:
   - docker:stable-dind
@@ -80,6 +82,8 @@ build:
 
 test:
   stage: test
+  tags:
+  - build-on-staging
   image: gliderlabs/herokuish:latest
   script:
     - cp -R . /tmp/app
@@ -92,6 +96,8 @@ test:
 
 code_quality:
   stage: test
+  tags:
+  - build-on-staging
   image: docker:stable
   allow_failure: true
   services:
@@ -109,6 +115,8 @@ code_quality:
 
 license_management:
   stage: test
+  tags:
+  - build-on-staging
   image: "registry.gitlab.com/gitlab-org/security-products/license-management:$CI_SERVER_VERSION_MAJOR-$CI_SERVER_VERSION_MINOR-stable"
   allow_failure: true
   script:
@@ -126,6 +134,8 @@ license_management:
 
 performance:
   stage: performance
+  tags:
+  - build-on-production
   image: docker:stable
   allow_failure: true
   services:
@@ -147,6 +157,8 @@ performance:
 
 sast:
   stage: test
+  tags:
+  - build-on-staging
   image: docker:stable
   allow_failure: true
   services:
@@ -167,6 +179,8 @@ sast:
 
 dependency_scanning:
   stage: test
+  tags:
+  - build-on-staging
   image: docker:stable
   allow_failure: true
   services:
@@ -187,6 +201,8 @@ dependency_scanning:
 
 container_scanning:
   stage: test
+  tags:
+  - build-on-staging
   image: docker:stable
   allow_failure: true
   services:
@@ -207,6 +223,8 @@ container_scanning:
 
 dast:
   stage: dast
+  tags:
+  - build-on-staging
   allow_failure: true
   image: registry.gitlab.com/gitlab-org/security-products/zaproxy
   script:
@@ -227,6 +245,8 @@ dast:
 
 review:
   stage: review
+  tags:
+  - build-on-staging
   script:
     - check_kube_domain
     - install_dependencies
@@ -254,6 +274,8 @@ review:
 
 stop_review:
   stage: cleanup
+  tags:
+  - build-on-staging
   variables:
     GIT_STRATEGY: none
   script:
@@ -283,6 +305,8 @@ stop_review:
 
 staging:
   stage: staging
+  tags:
+  - build-on-staging
   script:
     - check_kube_domain
     - install_dependencies
@@ -307,6 +331,8 @@ staging:
 
 canary:
   stage: canary
+  tags:
+  - build-on-production
   script:
     - check_kube_domain
     - install_dependencies
@@ -328,6 +354,8 @@ canary:
 
 .production: &production_template
   stage: production
+  tags:
+  - build-on-production
   script:
     - check_kube_domain
     - install_dependencies
@@ -397,6 +425,8 @@ production_manual:
 .manual_rollout_template: &manual_rollout_template
   <<: *rollout_template
   stage: production
+  tags:
+  - build-on-production
   when: manual
   # This selectors are backward compatible mode with $INCREMENTAL_ROLLOUT_ENABLED (before 11.4)
   only:
@@ -424,18 +454,24 @@ production_manual:
 timed rollout 10%:
   <<: *timed_rollout_template
   stage: incremental rollout 10%
+  tags:
+  - build-on-production
   variables:
     ROLLOUT_PERCENTAGE: 10
 
 timed rollout 25%:
   <<: *timed_rollout_template
   stage: incremental rollout 25%
+  tags:
+  - build-on-production
   variables:
     ROLLOUT_PERCENTAGE: 25
 
 timed rollout 50%:
   <<: *timed_rollout_template
   stage: incremental rollout 50%
+  tags:
+  - build-on-production
   variables:
     ROLLOUT_PERCENTAGE: 50
 
@@ -443,6 +479,8 @@ timed rollout 100%:
   <<: *timed_rollout_template
   <<: *production_template
   stage: incremental rollout 100%
+  tags:
+  - build-on-production
   variables:
     ROLLOUT_PERCENTAGE: 100
 
