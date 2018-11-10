@@ -631,6 +631,7 @@ rollout 100%:
     name=$(generate_name)
 
     url=$(generate_service_url)
+    namespaceDomain=$(generate_namespace_domain)
 
     if ! [ -e values.yaml ]; then
       touch values.yaml
@@ -641,6 +642,7 @@ rollout 100%:
       --set nameOverride="$CI_PROJECT_NAME" \
       --set fullnameOverride="$name" \
       --set service.url="$url" \
+      --set service.namespaceDomain="$namespaceDomain" \
       --set image.repository="$CI_APPLICATION_REPOSITORY" \
       --set image.tag="$CI_APPLICATION_TAG" \
       --set replicaCount="$replicas" \
@@ -826,7 +828,11 @@ rollout 100%:
   }
 
   function generate_service_url() {
-    echo "https://$(generate_name).$KUBE_NAMESPACE.$AUTO_DEVOPS_DOMAIN"
+    echo "https://$(generate_name).$(generate_namespace_domain)"
+  }
+
+  function generate_namespace_domain() {
+    echo "$KUBE_NAMESPACE.$AUTO_DEVOPS_DOMAIN"
   }
 
 before_script:
