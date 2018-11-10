@@ -41,7 +41,7 @@ ingress:
   #    hosts:
   #      - chart-example
 
-resources: {}
+resources:
   limits:
     cpu: 400m
     memory: 512Mi
