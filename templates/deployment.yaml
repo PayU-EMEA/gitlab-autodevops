@@ -38,7 +38,7 @@ spec:
               path: {{ .Values.service.healthCheckEndpoint }}
               port: {{ .Values.service.internalPort }}
             initialDelaySeconds: 15
-            timeoutSeconds: 15
+            timeoutSeconds: 60
           readinessProbe:
             httpGet:
               path: {{ .Values.service.healthCheckEndpoint }}

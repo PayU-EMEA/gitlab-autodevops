@@ -41,15 +41,15 @@ ingress:
   #    hosts:
   #      - chart-example
 
-resources:
-  limits:
-    cpu: 400m
-    memory: 512Mi
-    ephemeral-storage: "2Gi"
-  requests:
-    cpu: 100m
-    memory: 128Mi
-    ephemeral-storage: "500Mi"
+resources: {}
+#  limits:
+#    cpu: 400m
+#    memory: 512Mi
+#    ephemeral-storage: "2Gi"
+#  requests:
+#    cpu: 100m
+#    memory: 128Mi
+#    ephemeral-storage: "500Mi"
 
 nodeSelector: {}
 
