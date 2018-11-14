@@ -706,10 +706,11 @@ rollout 100%:
   function download_chart() {
     helm init --client-only
 
-    helm fetch https://github.com/PayU/gitlab-autodevops/archive/master.zip
-    unzip master.zip
-
-    mv gitlab-autodevops-master chart
+    if [[ ! -d chart ]]; then
+      helm fetch https://github.com/PayU/gitlab-autodevops/archive/master.zip
+      unzip master.zip
+      mv gitlab-autodevops-master chart
+    fi
 
     helm dependency update chart/
     helm dependency build chart/
