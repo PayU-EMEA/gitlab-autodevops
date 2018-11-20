@@ -60,3 +60,7 @@ affinity: {}
 
 redis:
   enabled: false
+
+redis-ha:
+  persistence:
+    enabled: false
