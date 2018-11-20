@@ -52,6 +52,10 @@ variables:
 
   DOCKER_DRIVER: overlay2
 
+cache:
+  paths:
+  - /root/.m2/repository/
+
 stages:
   - build
   - test
