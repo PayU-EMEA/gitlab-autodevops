@@ -18,12 +18,6 @@ Chart can be fetched by:
 helm fetch https://github.com/PayU/gitlab-autodevops/archive/master.zip
 ```
 
-### CI/CD variables
-
-| Variable | Default | Description |
-| -------- | ------- | ----------- |
-| **APP_HEALTH_CHECK_ENDPOINT** | ```/``` | Endpoint for Kubernetes to test node availability |
-
 ##### References
 
 * [Auto-DevOps.gitlab-ci.yml](https://gitlab.com/gitlab-org/gitlab-ce/blob/master/lib/gitlab/ci/templates/Auto-DevOps.gitlab-ci.yml)
