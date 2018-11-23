@@ -111,6 +111,7 @@ production:
   }
 
   function deploy_staging() {
+    export DOCKER_HOST='tcp://localhost:2375'
     docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
     docker tag "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG" "$CI_APPLICATION_REPOSITORY:latest"
     docker push "$CI_APPLICATION_REPOSITORY:latest"
@@ -119,6 +120,7 @@ production:
   }
 
   function deploy_production() {
+    export DOCKER_HOST='tcp://localhost:2375'
     docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
     docker tag "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG" "$CI_APPLICATION_REPOSITORY:stable"
     docker push "$CI_APPLICATION_REPOSITORY:stable"
