@@ -164,15 +164,11 @@ production:
   function deploy() {
     git clone $CHART_REPO_URL
 
-    if ! [ -e ${CHART_REPO_NAME}/charts/$CI_PROJECT_NAME/version.$CI_ENVIRONMENT_SLUG ]; then
-      touch ${CHART_REPO_NAME}/charts/$CI_PROJECT_NAME/version.$CI_ENVIRONMENT_SLUG
-    fi
-
-    echo -e "$CI_APPLICATION_TAG" > ${CHART_REPO_NAME}/charts/$CI_PROJECT_NAME/version.$CI_ENVIRONMENT_SLUG
-
     helm upgrade --install \
       --debug \
       --wait \
+      --set image.environment="$CI_ENVIRONMENT_SLUG" \
+      --set image.tag="latest" \
       --namespace="$KUBE_NAMESPACE" \
       --tiller-namespace="$TILLER_NAMESPACE" \
       -f ${CHART_REPO_NAME}/charts/${APP_NAME}-configserver/values-${CI_ENVIRONMENT_SLUG}.yaml \
@@ -191,8 +187,6 @@ production:
       ${CHART_REPO_NAME}/
 
     kubectl rollout status -n "${KUBE_NAMESPACE}" -w "deployment/${APP_NAME}-${CI_ENVIRONMENT_SLUG}-${CI_PROJECT_NAME}"
-
-    (cd ${CHART_REPO_NAME}; git add charts/$CI_PROJECT_NAME/version.$CI_ENVIRONMENT_SLUG; git -c user.name='${APP_NAME}' -c user.email='<>' commit -m "Version updated in charts/$CI_PROJECT_NAME/version.$CI_ENVIRONMENT_SLUG"; git push || true;)
   }
 
 before_script:
