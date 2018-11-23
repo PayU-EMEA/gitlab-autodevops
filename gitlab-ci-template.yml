@@ -173,7 +173,6 @@ production:
       --tiller-namespace="$TILLER_NAMESPACE" \
       "${APP_NAME}-${CI_ENVIRONMENT_SLUG}" \
       ${CHART_REPO_NAME}/charts/${APP_NAME}-configserver/
-
     kubectl rollout status -n "${KUBE_NAMESPACE}" -w "deployment/${APP_NAME}-${CI_ENVIRONMENT_SLUG}-${APP_NAME}-configserver"
 
     helm upgrade --install \
@@ -184,7 +183,6 @@ production:
       -f ${CHART_REPO_NAME}/values-${CI_ENVIRONMENT_SLUG}.yaml \
       "${APP_NAME}-${CI_ENVIRONMENT_SLUG}" \
       ${CHART_REPO_NAME}/
-
     kubectl rollout status -n "${KUBE_NAMESPACE}" -w "deployment/${APP_NAME}-${CI_ENVIRONMENT_SLUG}-${CI_PROJECT_NAME}"
   }
 
