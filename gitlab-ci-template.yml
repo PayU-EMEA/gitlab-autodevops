@@ -171,7 +171,6 @@ production:
       --set image.tag="latest" \
       --namespace="$KUBE_NAMESPACE" \
       --tiller-namespace="$TILLER_NAMESPACE" \
-      -f ${CHART_REPO_NAME}/charts/${APP_NAME}-configserver/values-${CI_ENVIRONMENT_SLUG}.yaml \
       "${APP_NAME}-${CI_ENVIRONMENT_SLUG}" \
       ${CHART_REPO_NAME}/charts/${APP_NAME}-configserver/
 
