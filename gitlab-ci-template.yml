@@ -108,13 +108,17 @@ production:
       --build-arg no_proxy="$no_proxy" \
       -t "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG" .
     docker push "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG"
+
+    docker tag "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG" "$CI_APPLICATION_REPOSITORY:latest"
+    docker push "$CI_APPLICATION_REPOSITORY:latest"
+
   }
 
   function deploy_staging() {
-    export DOCKER_HOST='tcp://localhost:2375'
-    docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
-    docker tag "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG" "$CI_APPLICATION_REPOSITORY:latest"
-    docker push "$CI_APPLICATION_REPOSITORY:latest"
+    #export DOCKER_HOST='tcp://localhost:2375'
+    #docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    #docker tag "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG" "$CI_APPLICATION_REPOSITORY:latest"
+    #docker push "$CI_APPLICATION_REPOSITORY:latest"
 
     echo "TODO: Now deployment pipeline should be triggered..."
   }
