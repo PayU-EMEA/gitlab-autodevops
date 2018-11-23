@@ -1,0 +1,117 @@
+image: alpine:latest
+
+variables:
+  KUBERNETES_VERSION: 1.10.9
+  HELM_VERSION: 2.11.0
+  DOCKER_DRIVER: overlay2
+
+stages:
+- staging
+- production
+
+staging:
+  stage: staging
+  tags:
+  - build-on-staging
+  script:
+  - prepare_deploy
+  - deploy
+  environment:
+    name: staging
+    url: "https://${APP_NAME}-front.${APP_NAME}-${CI_ENVIRONMENT_SLUG}.${AUTO_DEVOPS_DOMAIN}"
+  only:
+    refs:
+    - master
+
+production:
+  stage: production
+  tags:
+  - build-on-production
+  script:
+  - prepare_deploy
+  - deploy
+  environment:
+    name: production
+    url: "https://${APP_NAME}-front.${APP_NAME}-${CI_ENVIRONMENT_SLUG}.${AUTO_DEVOPS_DOMAIN}"
+  only:
+    refs:
+    - master
+
+# ---------------------------------------------------------------------------
+
+.auto_devops: &auto_devops |
+  # Auto DevOps variables and functions
+  [[ "$TRACE" ]] && set -x
+
+  function prepare_deploy() {
+
+    echo "Installing dependencies..."
+
+    apk add -U openssl openssh curl tar gzip bash ca-certificates git
+    curl -L -o /etc/apk/keys/sgerrand.rsa.pub https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub
+    curl -L -O https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.28-r0/glibc-2.28-r0.apk
+    apk add glibc-2.28-r0.apk
+    rm glibc-2.28-r0.apk
+
+    curl "https://kubernetes-helm.storage.googleapis.com/helm-v${HELM_VERSION}-linux-amd64.tar.gz" | tar zx
+    mv linux-amd64/helm /usr/bin/
+    mv linux-amd64/tiller /usr/bin/
+    helm version --client
+    tiller -version
+
+    curl -L -o /usr/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/linux/amd64/kubectl"
+    chmod +x /usr/bin/kubectl
+    kubectl version --client
+
+    echo "Checking kubernetes namespace..."
+
+    kubectl describe namespace "$KUBE_NAMESPACE" || kubectl create namespace "$KUBE_NAMESPACE"
+
+    echo "Initializing Tiller..."
+
+    export HELM_HOST="localhost:44134"
+    tiller -listen ${HELM_HOST} -alsologtostderr > /dev/null 2>&1 &
+
+    if ! helm version --debug; then
+      echo "Failed to init Tiller."
+      return 1
+    fi
+
+    echo "Creating secret..."
+
+    kubectl create secret -n "$KUBE_NAMESPACE" \
+      docker-registry gitlab-registry \
+      --docker-server="$CI_REGISTRY" \
+      --docker-username="${CI_DEPLOY_USER:-$CI_REGISTRY_USER}" \
+      --docker-password="${CI_DEPLOY_PASSWORD:-$CI_REGISTRY_PASSWORD}" \
+      --docker-email="$GITLAB_USER_EMAIL" \
+      -o yaml --dry-run | kubectl replace -n "$KUBE_NAMESPACE" --force -f -
+  }
+
+  function deploy() {
+    git clone $CHART_REPO_URL
+
+    helm upgrade --install \
+      --debug \
+      --wait \
+      --set image.environment="$CI_ENVIRONMENT_SLUG" \
+      --set image.tag="stable" \
+      --namespace="$KUBE_NAMESPACE" \
+      --tiller-namespace="$TILLER_NAMESPACE" \
+      "${APP_NAME}-${CI_ENVIRONMENT_SLUG}" \
+      ${CHART_REPO_NAME}/charts/${APP_NAME}-configserver/
+    kubectl rollout status -n "${KUBE_NAMESPACE}" -w "deployment/${APP_NAME}-${CI_ENVIRONMENT_SLUG}-${APP_NAME}-configserver"
+
+    helm upgrade --install \
+      --debug \
+      --wait \
+      --namespace="$KUBE_NAMESPACE" \
+      --tiller-namespace="$TILLER_NAMESPACE" \
+      -f ${CHART_REPO_NAME}/values-${CI_ENVIRONMENT_SLUG}.yaml \
+      "${APP_NAME}-${CI_ENVIRONMENT_SLUG}" \
+      ${CHART_REPO_NAME}/
+    kubectl rollout status -n "${KUBE_NAMESPACE}" -w "deployment/${APP_NAME}-${CI_ENVIRONMENT_SLUG}-${CI_PROJECT_NAME}"
+  }
+
+before_script:
+- *auto_devops
