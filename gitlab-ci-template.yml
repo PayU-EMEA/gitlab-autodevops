@@ -162,7 +162,7 @@ production:
   }
 
   function deploy() {
-    releaseName = "${APP_NAME}-${CI_ENVIRONMENT_SLUG}"
+    releaseName="${APP_NAME}-${CI_ENVIRONMENT_SLUG}"
 
     git clone $CHART_REPO_URL
 
