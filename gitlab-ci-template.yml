@@ -70,7 +70,7 @@ staging:
   - deploy
   environment:
     name: staging
-    url: "https://$CI_PROJECT_NAME.$KUBE_NAMESPACE.$AUTO_DEVOPS_DOMAIN"
+    url: "https://${CI_PROJECT_NAME}.${APP_NAME}-${CI_ENVIRONMENT_SLUG}.${AUTO_DEVOPS_DOMAIN}"
   only:
     refs:
     - master
@@ -86,7 +86,7 @@ production:
   - deploy
   environment:
     name: production
-    url: "https://$CI_PROJECT_NAME.$KUBE_NAMESPACE.$AUTO_DEVOPS_DOMAIN"
+    url: "https://${CI_PROJECT_NAME}.${APP_NAME}-${CI_ENVIRONMENT_SLUG}.${AUTO_DEVOPS_DOMAIN}"
   only:
     refs:
     - master
@@ -175,9 +175,9 @@ production:
       --wait \
       --namespace="$KUBE_NAMESPACE" \
       --tiller-namespace="$TILLER_NAMESPACE" \
-      -f ${CHART_REPO_NAME}/charts/${CI_PROJECT_NAME}/values-${CI_ENVIRONMENT_SLUG}.yaml \
+      -f ${CHART_REPO_NAME}/values-${CI_ENVIRONMENT_SLUG}.yaml \
       "${APP_NAME}-${CI_ENVIRONMENT_SLUG}" \
-      ${CHART_REPO_NAME}/charts/${CI_PROJECT_NAME}/
+      ${CHART_REPO_NAME}/
 
     kubectl rollout status -n "${KUBE_NAMESPACE}" -w "deployment/${APP_NAME}-${CI_ENVIRONMENT_SLUG}-${CI_PROJECT_NAME}"
 
