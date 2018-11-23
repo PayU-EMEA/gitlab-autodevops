@@ -58,6 +58,8 @@ package:
 staging:
   stage: staging
   image: docker:stable-git
+  services:
+    - docker:stable-dind
   script:
   - deploy_staging
   environment:
@@ -70,6 +72,8 @@ staging:
 production:
   stage: production
   image: docker:stable-git
+  services:
+    - docker:stable-dind
   when: manual
   allow_failure: false
   script:
