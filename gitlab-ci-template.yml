@@ -5,6 +5,7 @@ variables:
   HELM_VERSION: 2.11.0
   DOCKER_DRIVER: overlay2
   MAVEN_OPTS: -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2
+  IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
 
 stages:
 - build_and_test
@@ -108,17 +109,14 @@ production:
       --build-arg no_proxy="$no_proxy" \
       -t "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG" .
     docker push "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG"
-
-    docker tag "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG" "$CI_APPLICATION_REPOSITORY:latest"
-    docker push "$CI_APPLICATION_REPOSITORY:latest"
-
   }
 
   function deploy_staging() {
-    #export DOCKER_HOST='tcp://localhost:2375'
-    #docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
-    #docker tag "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG" "$CI_APPLICATION_REPOSITORY:latest"
-    #docker push "$CI_APPLICATION_REPOSITORY:latest"
+    export DOCKER_HOST='tcp://localhost:2375'
+    docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    docker pull "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG"
+    docker tag "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG" "$CI_APPLICATION_REPOSITORY:latest"
+    docker push "$CI_APPLICATION_REPOSITORY:latest"
 
     echo "TODO: Now deployment pipeline should be triggered..."
   }
@@ -126,6 +124,7 @@ production:
   function deploy_production() {
     export DOCKER_HOST='tcp://localhost:2375'
     docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    docker pull "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG"
     docker tag "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG" "$CI_APPLICATION_REPOSITORY:stable"
     docker push "$CI_APPLICATION_REPOSITORY:stable"
 
