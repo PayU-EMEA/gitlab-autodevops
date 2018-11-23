@@ -17,8 +17,6 @@ build_and_test:maven:
   cache:
     paths:
     - .m2/
-  tags:
-  - build-on-staging
   image: maven:3-jdk-11-slim
   script:
   - mvn --batch-mode install
@@ -34,8 +32,6 @@ build_and_test:node:
   cache:
     paths:
     - node_modules/
-  tags:
-  - build-on-staging
   image: node:slim
   script:
   - npm install
@@ -53,8 +49,6 @@ package:
   image: docker:stable-git
   services:
   - docker:stable-dind
-  tags:
-  - build-on-staging
   script:
   - build_docker_image
   dependencies:
@@ -63,8 +57,7 @@ package:
 
 staging:
   stage: staging
-  tags:
-  - build-on-staging
+  image: docker:stable-git
   script:
   - deploy_staging
   environment:
@@ -76,8 +69,7 @@ staging:
 
 production:
   stage: production
-  tags:
-  - build-on-production
+  image: docker:stable-git
   when: manual
   allow_failure: false
   script:
