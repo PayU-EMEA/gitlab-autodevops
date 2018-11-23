@@ -94,17 +94,6 @@ production:
     helm upgrade --install \
       --debug \
       --wait \
-      --set image.environment="$CI_ENVIRONMENT_SLUG" \
-      --set image.tag="stable" \
-      --namespace="$KUBE_NAMESPACE" \
-      --tiller-namespace="$TILLER_NAMESPACE" \
-      "${APP_NAME}-${CI_ENVIRONMENT_SLUG}" \
-      ${CHART_REPO_NAME}/charts/${APP_NAME}-configserver/
-    kubectl rollout status -n "${KUBE_NAMESPACE}" -w "deployment/${APP_NAME}-${CI_ENVIRONMENT_SLUG}-${APP_NAME}-configserver"
-
-    helm upgrade --install \
-      --debug \
-      --wait \
       --namespace="$KUBE_NAMESPACE" \
       --tiller-namespace="$TILLER_NAMESPACE" \
       -f ${CHART_REPO_NAME}/values-${CI_ENVIRONMENT_SLUG}.yaml \
