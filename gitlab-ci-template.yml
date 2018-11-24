@@ -150,7 +150,7 @@ production:
     echo "Creating secret..."
 
     kubectl create secret -n "$KUBE_NAMESPACE" \
-      docker-registry gitlab-registry \
+      docker-registry gitlab-registry-${CI_PROJECT_NAME} \
       --docker-server="$CI_REGISTRY" \
       --docker-username="${CI_DEPLOY_USER:-$CI_REGISTRY_USER}" \
       --docker-password="${CI_DEPLOY_PASSWORD:-$CI_REGISTRY_PASSWORD}" \
@@ -174,7 +174,7 @@ production:
     --wait \
     --namespace="$KUBE_NAMESPACE" \
     --tiller-namespace="$TILLER_NAMESPACE" \
-    -f values-${CI_ENVIRONMENT_SLUG}.yaml \
+    -f ${CHART_REPO_NAME}/values-${CI_ENVIRONMENT_SLUG}.yaml \
     "${APP_NAME}-${CI_ENVIRONMENT_SLUG}" \
     ${CHART_REPO_NAME}/
   }
