@@ -12,6 +12,7 @@ stages:
 - package
 - staging
 - production
+- performance
 
 build_and_test:maven:
   stage: build_and_test
@@ -66,7 +67,7 @@ staging:
   - deploy
   environment:
     name: staging
-    url: "https://${CI_PROJECT_NAME}.${APP_NAME}-${CI_ENVIRONMENT_SLUG}.${AUTO_DEVOPS_DOMAIN}"
+    url: "https://${APP_NAME}-front.${APP_NAME}-staging.${AUTO_DEVOPS_DOMAIN}"
   only:
     refs:
     - master
@@ -83,10 +84,28 @@ production:
   - deploy
   environment:
     name: production
-    url: "https://${CI_PROJECT_NAME}.${APP_NAME}-${CI_ENVIRONMENT_SLUG}.${AUTO_DEVOPS_DOMAIN}"
+    url: "https://${APP_NAME}-front.${APP_NAME}-production.${AUTO_DEVOPS_DOMAIN}"
   only:
     refs:
     - master
+
+performance:
+  stage: performance
+  image: docker:stable
+  allow_failure: true
+  services:
+    - docker:stable-dind
+  script:
+    - performance
+  artifacts:
+    paths:
+      - performance.json
+      - sitespeed-results/
+  only:
+    refs:
+      - branches
+    variables:
+      - $IS_NODE_PROJECT
 
 # ---------------------------------------------------------------------------
 
@@ -177,6 +196,16 @@ production:
     -f ${CHART_REPO_NAME}/values-${CI_ENVIRONMENT_SLUG}.yaml \
     "${APP_NAME}-${CI_ENVIRONMENT_SLUG}" \
     ${CHART_REPO_NAME}/
+  }
+
+  function performance() {
+    export DOCKER_HOST='tcp://localhost:2375'
+    export CI_ENVIRONMENT_URL="https://${APP_NAME}-front.${APP_NAME}-production.${AUTO_DEVOPS_DOMAIN}"
+    mkdir gitlab-exporter
+    wget -O gitlab-exporter/index.js https://gitlab.com/gitlab-org/gl-performance/raw/10-5/index.js
+    mkdir sitespeed-results
+    docker run --shm-size=1g --rm -v "$(pwd)":/sitespeed.io sitespeedio/sitespeed.io:6.3.1 --plugins.add ./gitlab-exporter --outputFolder sitespeed-results "$CI_ENVIRONMENT_URL"
+    mv sitespeed-results/data/performance.json performance.json
   }
 
 before_script:
