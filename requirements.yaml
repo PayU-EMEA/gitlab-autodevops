@@ -1,6 +1,0 @@
-dependencies:
-  - name: redis-ha
-    version: ~3.0.1
-    repository: '@stable'
-    condition: redis.enabled
-
