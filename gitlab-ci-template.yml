@@ -19,7 +19,7 @@ build_and_test:maven:
   cache:
     paths:
     - .m2/
-  image: maven:3-jdk-11-slim
+  image: payu-sicarios.githost.io:4678/psd2-scrooge/scrooge-infra/maven:3-jdk-11-slim-payu
   script:
   - mvn --batch-mode install
   artifacts:
