@@ -19,7 +19,7 @@ build_and_test:maven:
   cache:
     paths:
     - .m2/
-  image: payu-sicarios.githost.io:4678/psd2-scrooge/scrooge-infra/maven:3-jdk-11-slim-payu
+  image: $MVN_BUILD_IMAGE
   script:
   - mvn --batch-mode install
   artifacts:
@@ -67,7 +67,7 @@ staging:
   - deploy
   environment:
     name: staging
-    url: "https://${APP_NAME}-front.${APP_NAME}-staging.${AUTO_DEVOPS_DOMAIN}"
+    url: "https://${APP_NAME}-front-${APP_NAME}-staging.${AUTO_DEVOPS_DOMAIN}"
   only:
     refs:
     - master
@@ -84,7 +84,7 @@ production:
   - deploy
   environment:
     name: production
-    url: "https://${APP_NAME}-front.${APP_NAME}-production.${AUTO_DEVOPS_DOMAIN}"
+    url: "https://${APP_NAME}-front-${APP_NAME}-production.${AUTO_DEVOPS_DOMAIN}"
   only:
     refs:
     - master
@@ -199,6 +199,7 @@ performance:
     helm upgrade --install \
     --debug \
     --wait \
+    --set ${CI_PROJECT_NAME}.tag=${CI_APPLICATION_TAG} \
     --namespace="$KUBE_NAMESPACE" \
     --tiller-namespace="$TILLER_NAMESPACE" \
     -f ${CHART_REPO_NAME}/values-${CI_ENVIRONMENT_SLUG}.yaml \
