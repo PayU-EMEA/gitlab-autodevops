@@ -188,13 +188,11 @@ performance:
 
     helm dep up \
     --debug \
-    --namespace="$KUBE_NAMESPACE" \
     --tiller-namespace="$TILLER_NAMESPACE" \
     ${CHART_REPO_NAME}
 
     helm dep build \
     --debug \
-    --namespace="$KUBE_NAMESPACE" \
     --tiller-namespace="$TILLER_NAMESPACE" \
     ${CHART_REPO_NAME}
 
