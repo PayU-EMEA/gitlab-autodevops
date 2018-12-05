@@ -186,6 +186,18 @@ performance:
 
     git clone $CHART_REPO_URL
 
+    helm dep up \
+    --debug \
+    --namespace="$KUBE_NAMESPACE" \
+    --tiller-namespace="$TILLER_NAMESPACE" \
+    ${CHART_REPO_NAME}
+
+    helm dep build \
+    --debug \
+    --namespace="$KUBE_NAMESPACE" \
+    --tiller-namespace="$TILLER_NAMESPACE" \
+    ${CHART_REPO_NAME}
+
     helm upgrade --install \
     --debug \
     --wait \
