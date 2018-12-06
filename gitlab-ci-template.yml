@@ -67,7 +67,7 @@ staging:
   - deploy
   environment:
     name: staging
-    url: "https://${APP_NAME}-front-${APP_NAME}-staging.${AUTO_DEVOPS_DOMAIN}"
+    url: "https://${APP_NAME}-front-${APP_NAME}-staging.ingress.${AUTO_DEVOPS_DOMAIN}"
   only:
     refs:
     - master
@@ -84,7 +84,7 @@ production:
   - deploy
   environment:
     name: production
-    url: "https://${APP_NAME}-front-${APP_NAME}-production.${AUTO_DEVOPS_DOMAIN}"
+    url: "https://${APP_NAME}-front-${APP_NAME}-production.ingress.${AUTO_DEVOPS_DOMAIN}"
   only:
     refs:
     - master
@@ -209,7 +209,7 @@ performance:
 
   function performance() {
     export DOCKER_HOST='tcp://localhost:2375'
-    export CI_ENVIRONMENT_URL="https://${APP_NAME}-front.${APP_NAME}-production.${AUTO_DEVOPS_DOMAIN}"
+    export CI_ENVIRONMENT_URL="https://${APP_NAME}-front.${APP_NAME}-production.ingress.${AUTO_DEVOPS_DOMAIN}"
     mkdir gitlab-exporter
     wget -O gitlab-exporter/index.js https://gitlab.com/gitlab-org/gl-performance/raw/10-5/index.js
     mkdir sitespeed-results
