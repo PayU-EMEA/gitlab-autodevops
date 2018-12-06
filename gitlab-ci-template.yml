@@ -186,6 +186,8 @@ performance:
 
     git clone $CHART_REPO_URL
 
+    helm init --client-only
+
     helm dep up \
     --debug \
     --tiller-namespace="$TILLER_NAMESPACE" \
