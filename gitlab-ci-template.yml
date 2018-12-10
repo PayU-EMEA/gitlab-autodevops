@@ -1,4 +1,4 @@
-image: alpine:latest
+image: alpine/git:latest
 
 variables:
   KUBERNETES_VERSION: 1.10.9
@@ -220,5 +220,4 @@ performance:
   }
 
 before_script:
-- apk update && apk add git
 - *auto_devops
