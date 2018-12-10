@@ -1,4 +1,4 @@
-image: alpine/git:latest
+image: alpine:latest
 
 variables:
   KUBERNETES_VERSION: 1.10.9
@@ -114,9 +114,9 @@ performance:
   [[ "$TRACE" ]] && set -x
 
   export CI_APPLICATION_REPOSITORY=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG
-  export CI_APPLICATION_TAG=$(git show -s --format=%cd-%h --date=format:'%Y%m%d%H%M%S' $CI_COMMIT_SHA)
 
   function build_docker_image() {
+    export CI_APPLICATION_TAG=$(getApplicationTag)
     export DOCKER_HOST='tcp://localhost:2375'
     docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
     docker build \
@@ -178,6 +178,7 @@ performance:
   }
 
   function deploy() {
+    export CI_APPLICATION_TAG=$(getApplicationTag)
     export DOCKER_HOST='tcp://localhost:2375'
     docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
     docker pull "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG"
@@ -217,6 +218,10 @@ performance:
     mkdir sitespeed-results
     docker run --shm-size=1g --rm -v "$(pwd)":/sitespeed.io sitespeedio/sitespeed.io:6.3.1 --plugins.add ./gitlab-exporter --outputFolder sitespeed-results "$CI_ENVIRONMENT_URL"
     mv sitespeed-results/data/performance.json performance.json
+  }
+
+  function getApplicationTag() {
+    git show -s --format=%cd-%h --date=format:'%Y%m%d%H%M%S' $CI_COMMIT_SHA
   }
 
 before_script:
