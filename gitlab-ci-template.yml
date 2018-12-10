@@ -114,7 +114,7 @@ performance:
   [[ "$TRACE" ]] && set -x
 
   export CI_APPLICATION_REPOSITORY=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG
-  export CI_APPLICATION_TAG=$CI_COMMIT_SHA
+  export CI_APPLICATION_TAG=$(git show -s --format=%cd-%h --date=format:'%Y%m%d%H%M%S' $CI_COMMIT_SHA)
 
   function build_docker_image() {
     export DOCKER_HOST='tcp://localhost:2375'
