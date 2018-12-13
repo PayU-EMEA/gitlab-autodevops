@@ -3,6 +3,7 @@ image: alpine:latest
 variables:
   KUBERNETES_VERSION: 1.10.9
   HELM_VERSION: 2.11.0
+  DOCKER_HOST: tcp://docker:2375/
   DOCKER_DRIVER: overlay2
   MAVEN_OPTS: -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2
   IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
@@ -116,7 +117,6 @@ performance:
   function build_docker_image() {
     export CI_APPLICATION_REPOSITORY=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG
     export CI_APPLICATION_TAG=$(getApplicationTag)
-    export DOCKER_HOST='tcp://localhost:2375'
 
     docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
     docker build \
@@ -170,6 +170,7 @@ performance:
   function deploy() {
     export CI_APPLICATION_TAG=$(getApplicationTag)
 
+    chmod 400 /root/.ssh/sicarios
     eval `ssh-agent -s`
     ssh-agent $(ssh-add /root/.ssh/sicarios; git clone $CHART_REPO_URL)
 
@@ -190,7 +191,6 @@ performance:
   }
 
   function performance() {
-    export DOCKER_HOST='tcp://localhost:2375'
     export CI_ENVIRONMENT_URL="https://${APP_NAME}-front.${APP_NAME}-production.ingress.${AUTO_DEVOPS_DOMAIN}"
     mkdir gitlab-exporter
     wget -O gitlab-exporter/index.js https://gitlab.com/gitlab-org/gl-performance/raw/10-5/index.js
