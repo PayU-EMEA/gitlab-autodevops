@@ -172,9 +172,9 @@ performance:
 
     ssh-agent $(ssh-add /root/.ssh/sicarios; git clone $CHART_REPO_URL)
 
-    cat versions-${CI_ENVIRONMENT_SLUG}.yaml | tr '\n' '|' | sed -e 's/${CI_PROJECT_NAME}:|  tag:[^|]*|/${CI_PROJECT_NAME}:|  tag: ${CI_APPLICATION_TAG}|/' | tr '|' '\n' > versions-${CI_ENVIRONMENT_SLUG}.yaml.tmp
-    cat versions-${CI_ENVIRONMENT_SLUG}.yaml.tmp > versions-${CI_ENVIRONMENT_SLUG}.yaml
-    rm -rf versions-${CI_ENVIRONMENT_SLUG}.yaml.tmp
+    cat ${CHART_REPO_NAME}/versions-${CI_ENVIRONMENT_SLUG}.yaml | tr '\n' '|' | sed -e 's/${CI_PROJECT_NAME}:|  tag:[^|]*|/${CI_PROJECT_NAME}:|  tag: ${CI_APPLICATION_TAG}|/' | tr '|' '\n' > ${CHART_REPO_NAME}/versions-${CI_ENVIRONMENT_SLUG}.yaml.tmp
+    cat ${CHART_REPO_NAME}/versions-${CI_ENVIRONMENT_SLUG}.yaml.tmp > ${CHART_REPO_NAME}/versions-${CI_ENVIRONMENT_SLUG}.yaml
+    rm -rf ${CHART_REPO_NAME}/versions-${CI_ENVIRONMENT_SLUG}.yaml.tmp
 
     (cd ${CHART_REPO_NAME}; git add versions-${CI_ENVIRONMENT_SLUG}.yaml; git -c user.name='${APP_NAME}' -c user.email='<>'  commit -m "Updated versions-${CI_ENVIRONMENT_SLUG}.yaml: ${CI_PROJECT_NAME}.tag=${CI_APPLICATION_TAG}"; git push || true;)
 
