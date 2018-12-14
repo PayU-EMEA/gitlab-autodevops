@@ -167,18 +167,15 @@ performance:
   function deploy() {
     export CI_APPLICATION_TAG=$(getApplicationTag)
 
-
     ln -s /mnt/cache/.ssh /root/.ssh
-    ls -laR ~
 
     git clone $CHART_REPO_URL
 
+    TMP=`mktemp`
+    cat ${CHART_REPO_NAME}/versions-${CI_ENVIRONMENT_SLUG}.yaml | tr '\n' '|' | sed -e "s/$CI_PROJECT_NAME:|  tag:[^|]*|/$CI_PROJECT_NAME:|  tag: $CI_APPLICATION_TAG|/" | tr '|' '\n' > $TMP
+    mv $TMP > ${CHART_REPO_NAME}/versions-${CI_ENVIRONMENT_SLUG}.yaml
 
-    cat ${CHART_REPO_NAME}/versions-${CI_ENVIRONMENT_SLUG}.yaml | tr '\n' '|' | sed -e 's/${CI_PROJECT_NAME}:|  tag:[^|]*|/${CI_PROJECT_NAME}:|  tag: ${CI_APPLICATION_TAG}|/' | tr '|' '\n' > ${CHART_REPO_NAME}/versions-${CI_ENVIRONMENT_SLUG}.yaml.tmp
-    cat ${CHART_REPO_NAME}/versions-${CI_ENVIRONMENT_SLUG}.yaml.tmp > ${CHART_REPO_NAME}/versions-${CI_ENVIRONMENT_SLUG}.yaml
-    rm -rf ${CHART_REPO_NAME}/versions-${CI_ENVIRONMENT_SLUG}.yaml.tmp
-
-    (cd ${CHART_REPO_NAME}; git add versions-${CI_ENVIRONMENT_SLUG}.yaml; git -c user.name='${APP_NAME}' -c user.email='<>' commit -m "Updated versions-${CI_ENVIRONMENT_SLUG}.yaml: ${CI_PROJECT_NAME}.tag=${CI_APPLICATION_TAG}"; git push || true;)
+    (cd ${CHART_REPO_NAME}; git add versions-${CI_ENVIRONMENT_SLUG}.yaml; git -c user.name='${APP_NAME}' -c user.email='<>' commit -m "Updated versions-${CI_ENVIRONMENT_SLUG}.yaml: ${CI_PROJECT_NAME}.tag=${CI_APPLICATION_TAG}"; git push;)
 
     helm init --client-only
     helm dependency update --debug --tiller-namespace="$TILLER_NAMESPACE" ${CHART_REPO_NAME}
