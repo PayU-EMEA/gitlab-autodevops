@@ -171,8 +171,7 @@ performance:
     TMP=`mktemp`
     cat ${CHART_REPO_NAME}/versions-${CI_ENVIRONMENT_SLUG}.yaml | tr '\n' '|' | sed -e "s/$CI_PROJECT_NAME:|  tag:[^|]*|/$CI_PROJECT_NAME:|  tag: $CI_APPLICATION_TAG|/" | tr '|' '\n' > $TMP
     mv $TMP ${CHART_REPO_NAME}/versions-${CI_ENVIRONMENT_SLUG}.yaml
-
-    (cd ${CHART_REPO_NAME}; git add versions-${CI_ENVIRONMENT_SLUG}.yaml; git -c user.name='${APP_NAME}' -c user.email='<>' commit -m "Updated versions-${CI_ENVIRONMENT_SLUG}.yaml: ${CI_PROJECT_NAME}.tag=${CI_APPLICATION_TAG}"; git push;)
+    (cd ${CHART_REPO_NAME}; git add versions-${CI_ENVIRONMENT_SLUG}.yaml; git -c user.name="$GITLAB_USER_LOGIN" -c user.email="$GITLAB_USER_EMAIL" commit -m "Updated versions-${CI_ENVIRONMENT_SLUG}.yaml: ${CI_PROJECT_NAME}.tag=${CI_APPLICATION_TAG}" || true; git push || true;)
 
     helm init --client-only
     helm dependency update --debug --tiller-namespace="$TILLER_NAMESPACE" ${CHART_REPO_NAME}
