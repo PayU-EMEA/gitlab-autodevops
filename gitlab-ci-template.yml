@@ -30,7 +30,6 @@ build_and_test:node:
   stage: build_and_test
   image: node:slim
   script:
-  - ln -s /mnt/cache/node_modules node_modules
   - npm install
   - npm run test
   - npm run build
