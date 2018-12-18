@@ -11,8 +11,8 @@ stages:
 - build_and_test
 - package
 - staging
-- production
 - performance
+- production
 
 build_and_test:maven:
   stage: build_and_test
