@@ -11,8 +11,9 @@ stages:
 - build_and_test
 - package
 - staging
-- performance
+- performance_staging
 - production
+- performance_production
 
 build_and_test:maven:
   stage: build_and_test
@@ -84,7 +85,7 @@ production:
     - master
 
 front_performance:
-  stage: performance
+  stage: performance_production
   image: docker:stable
   allow_failure: true
   services:
@@ -102,9 +103,8 @@ front_performance:
       - $IS_NODE_PROJECT
 
 backend_performance:
-  stage: performance
+  stage: performance_staging
   image: docker:stable
-  allow_failure: true
   services:
     - docker:stable-dind
   script:
