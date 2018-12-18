@@ -98,7 +98,7 @@ front_performance:
       - sitespeed-results/
   only:
     refs:
-      - branches
+      - master
     variables:
       - $IS_NODE_PROJECT
 
