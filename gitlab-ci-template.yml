@@ -83,14 +83,14 @@ production:
     refs:
     - master
 
-performance:
+front_performance:
   stage: performance
   image: docker:stable
   allow_failure: true
   services:
     - docker:stable-dind
   script:
-    - performance
+    - front_performance
   artifacts:
     paths:
       - performance.json
@@ -98,6 +98,24 @@ performance:
   only:
     refs:
       - branches
+    variables:
+      - $IS_NODE_PROJECT
+
+backend_performance:
+  stage: performance
+  image: docker:stable
+  allow_failure: true
+  services:
+    - docker:stable-dind
+  script:
+    - backend_performance
+  artifacts:
+    paths:
+      - backend_performance/
+  only:
+    refs:
+      - master
+  except:
     variables:
       - $IS_NODE_PROJECT
 
@@ -183,7 +201,7 @@ performance:
       "${APP_NAME}-${CI_ENVIRONMENT_SLUG}" ${CHART_REPO_NAME}/
   }
 
-  function performance() {
+  function front_performance() {
     export DOCKER_HOST='tcp://localhost:2375'
     export CI_ENVIRONMENT_URL="https://${APP_NAME}-front.${APP_NAME}-production.ingress.${AUTO_DEVOPS_DOMAIN}"
     mkdir gitlab-exporter
@@ -191,6 +209,13 @@ performance:
     mkdir sitespeed-results
     docker run --shm-size=1g --rm -v "$(pwd)":/sitespeed.io sitespeedio/sitespeed.io:6.3.1 --plugins.add ./gitlab-exporter --outputFolder sitespeed-results "$CI_ENVIRONMENT_URL"
     mv sitespeed-results/data/performance.json performance.json
+  }
+
+  function backend_performance() {
+    export DOCKER_HOST='tcp://localhost:2375'
+    mkdir backend_performance
+    docker pull $BACKEND_PERFORMANCE_IMG
+    docker run --shm-size=1g -v "$(pwd)/backend_performance":/test/target/gatling --rm $BACKEND_PERFORMANCE_IMG
   }
 
   function getApplicationTag() {
