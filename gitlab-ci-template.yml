@@ -213,6 +213,7 @@ backend_performance:
 
   function backend_performance() {
     export DOCKER_HOST='tcp://localhost:2375'
+    docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
     mkdir backend_performance
     docker pull $BACKEND_PERFORMANCE_IMG
     docker run --shm-size=1g -v "$(pwd)/backend_performance":/test/target/gatling --rm $BACKEND_PERFORMANCE_IMG
