@@ -41,6 +41,26 @@ build_and_test:node:
     variables:
     - $IS_NODE_PROJECT
 
+sonarqube_master_job:
+  stage: build_and_test
+  image: $MVN_BUILD_IMAGE
+  only:
+    - master
+  script:
+    - mvn --batch-mode verify sonar:sonar -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_LOGIN -Dsonar.gitlab.project_id=$CI_PROJECT_PATH -Dsonar.gitlab.commit_sha=$CI_COMMIT_REF -Dsonar.gitlab.ref_name=$CI_COMMIT_REF_NAME
+  allow_failure: true
+
+sonarqube_preview_feature_job:
+  stage: build_and_test
+  image: $MVN_BUILD_IMAGE
+  only:
+    - /^feature\/*/
+  script:
+    - git checkout origin/master
+    - git merge $CI_COMMIT_REF --no-commit --no-ff
+    - mvn --batch-mode verify sonar:sonar -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_LOGIN -Dsonar.analysis.mode=preview -Dsonar.gitlab.project_id=$CI_PROJECT_PATH -Dsonar.gitlab.commit_sha=$CI_COMMIT_REF -Dsonar.gitlab.ref_name=$CI_COMMIT_REF_NAME
+  allow_failure: true
+
 package:
   stage: package
   image: docker:stable-git
