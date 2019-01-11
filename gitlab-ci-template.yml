@@ -22,6 +22,7 @@ build_and_test:maven:
   - mvn --batch-mode install
   artifacts:
     paths:
+    - src/
     - target/
   except:
     variables:
@@ -37,29 +38,71 @@ build_and_test:node:
   artifacts:
     paths:
     - build/
+    - coverage/
+    - src/
   only:
     variables:
     - $IS_NODE_PROJECT
 
-sonarqube_master_job:
-  stage: build_and_test
+sonarqube_master:maven:
+  stage: package
   image: $MVN_BUILD_IMAGE
+  script:
+    - mvn --batch-mode sonar:sonar -Duser.home=/mnt/cache -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_LOGIN -Dsonar.core.codeCoveragePlugin=jacoco -Dsonar.gitlab.project_id=$CI_PROJECT_PATH -Dsonar.gitlab.commit_sha=$CI_COMMIT_REF -Dsonar.gitlab.ref_name=$CI_COMMIT_REF_NAME
+  allow_failure: true
   only:
     - master
-  script:
-    - mvn --batch-mode test sonar:sonar -Duser.home=/mnt/cache -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_LOGIN -Dsonar.core.codeCoveragePlugin=jacoco -Dsonar.gitlab.project_id=$CI_PROJECT_PATH -Dsonar.gitlab.commit_sha=$CI_COMMIT_REF -Dsonar.gitlab.ref_name=$CI_COMMIT_REF_NAME
-  allow_failure: true
+  except:
+    variables:
+      - $IS_NODE_PROJECT
+  dependencies:
+    - build_and_test:maven
 
-sonarqube_preview_feature_job:
-  stage: build_and_test
+sonarqube_master:node:
+  stage: package
   image: $MVN_BUILD_IMAGE
+  script:
+    - mvn --batch-mode sonar:sonar -Duser.home=/mnt/cache -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_LOGIN -Dsonar.gitlab.project_id=$CI_PROJECT_PATH -Dsonar.gitlab.commit_sha=$CI_COMMIT_REF -Dsonar.gitlab.ref_name=$CI_COMMIT_REF_NAME
+  allow_failure: true
   only:
-    - /^feature\/*/
+    branches:
+      - master
+    variables:
+      - $IS_NODE_PROJECT
+  dependencies:
+    - build_and_test:node
+
+sonarqube_preview_feature:maven:
+  stage: package
+  image: $MVN_BUILD_IMAGE
   script:
     - git checkout origin/master
     - git merge $CI_COMMIT_REF --no-commit --no-ff
-    - mvn --batch-mode test sonar:sonar -Duser.home=/mnt/cache -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_LOGIN -Dsonar.core.codeCoveragePlugin=jacoco -Dsonar.analysis.mode=preview -Dsonar.gitlab.project_id=$CI_PROJECT_PATH -Dsonar.gitlab.commit_sha=$CI_COMMIT_REF -Dsonar.gitlab.ref_name=$CI_COMMIT_REF_NAME
+    - mvn --batch-mode sonar:sonar -Duser.home=/mnt/cache -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_LOGIN -Dsonar.core.codeCoveragePlugin=jacoco -Dsonar.analysis.mode=preview -Dsonar.gitlab.project_id=$CI_PROJECT_PATH -Dsonar.gitlab.commit_sha=$CI_COMMIT_REF -Dsonar.gitlab.ref_name=$CI_COMMIT_REF_NAME
   allow_failure: true
+  only:
+    - /^feature\/*/
+  except:
+    variables:
+      - $IS_NODE_PROJECT
+  dependencies:
+    - build_and_test:maven
+
+sonarqube_preview_feature:node:
+  stage: package
+  image: $MVN_BUILD_IMAGE
+  script:
+    - git checkout origin/master
+    - git merge $CI_COMMIT_REF --no-commit --no-ff
+    - mvn --batch-mode sonar:sonar -Duser.home=/mnt/cache -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_LOGIN -Dsonar.analysis.mode=preview -Dsonar.gitlab.project_id=$CI_PROJECT_PATH -Dsonar.gitlab.commit_sha=$CI_COMMIT_REF -Dsonar.gitlab.ref_name=$CI_COMMIT_REF_NAME
+  allow_failure: true
+  only:
+    branches:
+      - /^feature\/*/
+    variables:
+      - $IS_NODE_PROJECT
+  dependencies:
+    - build_and_test:node
 
 package:
   stage: package
