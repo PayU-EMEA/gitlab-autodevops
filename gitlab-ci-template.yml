@@ -75,7 +75,7 @@ sonarqube_preview_feature:maven:
   image: $MVN_BUILD_IMAGE
   script:
     - git checkout origin/master
-    - git merge $CI_COMMIT_REF --no-commit --no-ff
+    - git merge $CI_COMMIT_SHA --no-commit --no-ff
     - mvn --batch-mode sonar:sonar -Duser.home=/mnt/cache -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_LOGIN -Dsonar.core.codeCoveragePlugin=jacoco -Dsonar.analysis.mode=preview -Dsonar.gitlab.project_id=$CI_PROJECT_PATH -Dsonar.gitlab.commit_sha=$CI_COMMIT_REF -Dsonar.gitlab.ref_name=$CI_COMMIT_REF_NAME
   allow_failure: true
   only:
@@ -91,7 +91,7 @@ sonarqube_preview_feature:node:
   image: $MVN_BUILD_IMAGE
   script:
     - git checkout origin/master
-    - git merge $CI_COMMIT_REF --no-commit --no-ff
+    - git merge $CI_COMMIT_SHA --no-commit --no-ff
     - mvn --batch-mode sonar:sonar -Duser.home=/mnt/cache -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_LOGIN -Dsonar.analysis.mode=preview -Dsonar.gitlab.project_id=$CI_PROJECT_PATH -Dsonar.gitlab.commit_sha=$CI_COMMIT_REF -Dsonar.gitlab.ref_name=$CI_COMMIT_REF_NAME
   allow_failure: true
   only:
