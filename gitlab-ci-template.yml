@@ -22,7 +22,6 @@ build_and_test:maven:
   - mvn --batch-mode install
   artifacts:
     paths:
-    - src/
     - target/
   except:
     variables:
@@ -39,7 +38,6 @@ build_and_test:node:
     paths:
     - build/
     - coverage/
-    - src/
   only:
     variables:
     - $IS_NODE_PROJECT
