@@ -74,8 +74,6 @@ sonarqube_preview_feature:maven:
   stage: package
   image: $MVN_BUILD_IMAGE
   script:
-    - git checkout origin/master
-    - git -c user.name="$GITLAB_USER_LOGIN" -c user.email="$GITLAB_USER_EMAIL" merge $CI_COMMIT_SHA --no-commit --no-ff
     - mvn --batch-mode sonar:sonar -Duser.home=/mnt/cache -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_LOGIN -Dsonar.core.codeCoveragePlugin=jacoco -Dsonar.analysis.mode=preview
   allow_failure: true
   only:
@@ -90,8 +88,6 @@ sonarqube_preview_feature:node:
   stage: package
   image: $MVN_BUILD_IMAGE
   script:
-    - git checkout origin/master
-    - git -c user.name="$GITLAB_USER_LOGIN" -c user.email="$GITLAB_USER_EMAIL" merge $CI_COMMIT_SHA --no-commit --no-ff
     - mvn --batch-mode sonar:sonar -Duser.home=/mnt/cache -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_LOGIN -Dsonar.analysis.mode=preview
   allow_failure: true
   only:
