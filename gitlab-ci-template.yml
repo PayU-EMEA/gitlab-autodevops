@@ -70,34 +70,6 @@ sonarqube_master:node:
   dependencies:
     - build_and_test:node
 
-sonarqube_preview_feature:maven:
-  stage: package
-  image: $MVN_BUILD_IMAGE
-  script:
-    - mvn --batch-mode sonar:sonar -Duser.home=/mnt/cache -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_LOGIN -Dsonar.core.codeCoveragePlugin=jacoco -Dsonar.analysis.mode=preview
-  allow_failure: true
-  only:
-    - /^feature\/*/
-  except:
-    variables:
-      - $IS_NODE_PROJECT
-  dependencies:
-    - build_and_test:maven
-
-sonarqube_preview_feature:node:
-  stage: package
-  image: $MVN_BUILD_IMAGE
-  script:
-    - mvn --batch-mode sonar:sonar -Duser.home=/mnt/cache -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_LOGIN -Dsonar.analysis.mode=preview
-  allow_failure: true
-  only:
-    refs:
-      - /^feature\/*/
-    variables:
-      - $IS_NODE_PROJECT
-  dependencies:
-    - build_and_test:node
-
 package:
   stage: package
   image: docker:stable-git
