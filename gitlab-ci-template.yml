@@ -17,6 +17,8 @@ stages:
 
 build_and_test:maven:
   stage: build_and_test
+  tags:
+    - build-on-staging
   image: $MVN_BUILD_IMAGE
   script:
   - mvn --batch-mode install
@@ -29,6 +31,8 @@ build_and_test:maven:
 
 build_and_test:node:
   stage: build_and_test
+  tags:
+    - build-on-staging
   image: node:slim
   script:
   - npm install
@@ -44,6 +48,8 @@ build_and_test:node:
 
 sonarqube_master:maven:
   stage: package
+  tags:
+    - build-on-staging
   image: $MVN_BUILD_IMAGE
   script:
     - mvn --batch-mode sonar:sonar -Duser.home=/mnt/cache -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_LOGIN -Dsonar.core.codeCoveragePlugin=jacoco -Dsonar.gitlab.project_id=$CI_PROJECT_PATH -Dsonar.gitlab.commit_sha=$CI_COMMIT_SHA -Dsonar.gitlab.ref_name=$CI_COMMIT_REF_NAME
@@ -58,6 +64,8 @@ sonarqube_master:maven:
 
 sonarqube_master:node:
   stage: package
+  tags:
+    - build-on-staging
   image: $MVN_BUILD_IMAGE
   script:
     - mvn --batch-mode package sonar:sonar -Duser.home=/mnt/cache -Dsonar.host.url=$SONAR_URL -Dsonar.login=$SONAR_LOGIN -Dsonar.gitlab.project_id=$CI_PROJECT_PATH -Dsonar.gitlab.commit_sha=$CI_COMMIT_SHA -Dsonar.gitlab.ref_name=$CI_COMMIT_REF_NAME
@@ -72,6 +80,8 @@ sonarqube_master:node:
 
 package:
   stage: package
+  tags:
+    - build-on-staging
   image: docker:stable-git
   services:
   - docker:stable-dind
@@ -83,6 +93,8 @@ package:
 
 staging:
   stage: staging
+  tags:
+    - build-on-staging
   image: docker:stable-git
   services:
   - docker:stable-dind
@@ -137,6 +149,8 @@ front_performance:
 
 backend_performance:
   stage: performance_staging
+  tags:
+    - build-on-staging
   image: docker:stable
   services:
     - docker:stable-dind
