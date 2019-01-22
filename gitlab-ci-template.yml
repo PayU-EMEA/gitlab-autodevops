@@ -98,6 +98,8 @@ staging:
 
 production:
   stage: production
+  tags:
+    - build-on-production
   image: docker:stable-git
   services:
   - docker:stable-dind
@@ -115,6 +117,8 @@ production:
 
 front_performance:
   stage: performance_production
+  tags:
+    - build-on-production
   image: docker:stable
   allow_failure: true
   services:
