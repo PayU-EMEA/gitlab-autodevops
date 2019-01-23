@@ -115,8 +115,6 @@ production:
   image: docker:stable-git
   services:
   - docker:stable-dind
-  when: manual
-  allow_failure: false
   script:
   - prepare_deploy
   - deploy
