@@ -11,9 +11,9 @@ stages:
 - build_and_test
 - package
 - staging
-- performance_staging
+- tests_on_staging
 - production
-- performance_production
+- tests_on_production
 
 build_and_test:maven:
   stage: build_and_test
@@ -125,28 +125,22 @@ production:
     refs:
     - master
 
-front_performance:
-  stage: performance_production
+e2e:
+  stage: tests_on_staging
   tags:
-    - build-on-production
+    - build-on-staging
   image: docker:stable
   allow_failure: true
   services:
     - docker:stable-dind
   script:
-    - front_performance
-  artifacts:
-    paths:
-      - performance.json
-      - sitespeed-results/
+    - e2e
   only:
     refs:
       - master
-    variables:
-      - $IS_NODE_PROJECT
 
 backend_performance:
-  stage: performance_staging
+  stage: tests_on_staging
   tags:
     - build-on-staging
   image: docker:stable
@@ -164,19 +158,25 @@ backend_performance:
     variables:
       - $IS_NODE_PROJECT
 
-e2e:
-  stage: performance_staging
+front_performance:
+  stage: tests_on_production
   tags:
-    - build-on-staging
+    - build-on-production
   image: docker:stable
   allow_failure: true
   services:
     - docker:stable-dind
   script:
-    - e2e
+    - front_performance
+  artifacts:
+    paths:
+      - performance.json
+      - sitespeed-results/
   only:
     refs:
       - master
+    variables:
+      - $IS_NODE_PROJECT
 
 # ---------------------------------------------------------------------------
 
