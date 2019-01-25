@@ -164,6 +164,20 @@ backend_performance:
     variables:
       - $IS_NODE_PROJECT
 
+e2e:
+  stage: performance_staging
+  tags:
+    - build-on-staging
+  image: docker:stable
+  allow_failure: true
+  services:
+    - docker:stable-dind
+  script:
+    - e2e
+  only:
+    refs:
+      - master
+
 # ---------------------------------------------------------------------------
 
 .auto_devops: &auto_devops |
@@ -262,6 +276,13 @@ backend_performance:
     mkdir backend_performance
     docker pull $BACKEND_PERFORMANCE_IMG
     docker run --shm-size=1g -v "$(pwd)/backend_performance":/test/target/gatling --rm $BACKEND_PERFORMANCE_IMG
+  }
+
+  function e2e() {
+    export DOCKER_HOST='tcp://localhost:2375'
+    docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    docker pull $E2E_IMG
+    docker run --shm-size=1gb --rm $E2E_IMG
   }
 
   function getApplicationTag() {
