@@ -130,7 +130,6 @@ e2e:
   tags:
     - build-on-staging
   image: docker:stable
-  allow_failure: true
   services:
     - docker:stable-dind
   script:
