@@ -8,12 +8,12 @@ variables:
   IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
 
 stages:
-- build_and_test
-- package
-- staging
-- performance_staging
-- production
-- performance_production
+  - build_and_test
+  - package
+  - staging
+  - tests_on_staging
+  - production
+  - tests_on_production
 
 build_and_test:maven:
   stage: build_and_test
@@ -21,13 +21,13 @@ build_and_test:maven:
     - build-on-staging
   image: $MVN_BUILD_IMAGE
   script:
-  - mvn --batch-mode install
+    - mvn --batch-mode install
   artifacts:
     paths:
-    - target/
+      - target/
   except:
     variables:
-    - $IS_NODE_PROJECT
+      - $IS_NODE_PROJECT
 
 build_and_test:node:
   stage: build_and_test
@@ -35,16 +35,16 @@ build_and_test:node:
     - build-on-staging
   image: node:slim
   script:
-  - npm install
-  - npm run test -- --coverage
-  - npm run build
+    - npm install
+    - npm run test -- --coverage
+    - npm run build
   artifacts:
     paths:
-    - build/
-    - coverage/
+      - build/
+      - coverage/
   only:
     variables:
-    - $IS_NODE_PROJECT
+      - $IS_NODE_PROJECT
 
 sonarqube_master:maven:
   stage: package
@@ -84,12 +84,12 @@ package:
     - build-on-staging
   image: docker:stable-git
   services:
-  - docker:stable-dind
+    - docker:stable-dind
   script:
-  - build_docker_image
+    - build_docker_image
   dependencies:
-  - build_and_test:maven
-  - build_and_test:node
+    - build_and_test:maven
+    - build_and_test:node
 
 staging:
   stage: staging
@@ -97,16 +97,16 @@ staging:
     - build-on-staging
   image: docker:stable-git
   services:
-  - docker:stable-dind
+    - docker:stable-dind
   script:
-  - prepare_deploy
-  - deploy
+    - prepare_deploy
+    - deploy
   environment:
     name: staging
     url: "https://${APP_NAME}-front-${APP_NAME}-staging.ingress.${AUTO_DEVOPS_DOMAIN}"
   only:
     refs:
-    - master
+      - master
 
 production:
   stage: production
@@ -114,21 +114,52 @@ production:
     - build-on-production
   image: docker:stable-git
   services:
-  - docker:stable-dind
-  when: manual
-  allow_failure: false
+    - docker:stable-dind
   script:
-  - prepare_deploy
-  - deploy
+    - prepare_deploy
+    - deploy
   environment:
     name: production
     url: "https://${APP_NAME}-front-${APP_NAME}-production.ingress.${AUTO_DEVOPS_DOMAIN}"
   only:
     refs:
-    - master
+      - master
+
+e2e:
+  stage: tests_on_staging
+  tags:
+    - build-on-staging
+  image: docker:stable
+  allow_failure: true
+  services:
+    - docker:stable-dind
+  script:
+    - e2e
+  only:
+    refs:
+      - master
+
+backend_performance:
+  stage: tests_on_staging
+  tags:
+    - build-on-staging
+  image: docker:stable
+  services:
+    - docker:stable-dind
+  script:
+    - backend_performance
+  artifacts:
+    paths:
+      - backend_performance/
+  only:
+    refs:
+      - master
+  except:
+    variables:
+      - $IS_NODE_PROJECT
 
 front_performance:
-  stage: performance_production
+  stage: tests_on_production
   tags:
     - build-on-production
   image: docker:stable
@@ -144,25 +175,6 @@ front_performance:
   only:
     refs:
       - master
-    variables:
-      - $IS_NODE_PROJECT
-
-backend_performance:
-  stage: performance_staging
-  tags:
-    - build-on-staging
-  image: docker:stable
-  services:
-    - docker:stable-dind
-  script:
-    - backend_performance
-  artifacts:
-    paths:
-      - backend_performance/
-  only:
-    refs:
-      - master
-  except:
     variables:
       - $IS_NODE_PROJECT
 
@@ -266,9 +278,16 @@ backend_performance:
     docker run --shm-size=1g -v "$(pwd)/backend_performance":/test/target/gatling --rm $BACKEND_PERFORMANCE_IMG
   }
 
+  function e2e() {
+    export DOCKER_HOST='tcp://localhost:2375'
+    docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    docker pull $E2E_IMG
+    docker run --shm-size=1gb --rm $E2E_IMG
+  }
+
   function getApplicationTag() {
     git show -s --format=%cd-%h --date=format:'%Y%m%d%H%M%S' $CI_COMMIT_SHA
   }
 
 before_script:
-- *auto_devops
+  - *auto_devops
