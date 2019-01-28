@@ -124,6 +124,9 @@ production:
   only:
     refs:
       - master
+  except:
+    variables:
+      - $NO_PRODUCTION
 
 e2e:
   stage: tests_on_staging
@@ -137,6 +140,9 @@ e2e:
   only:
     refs:
       - master
+  except:
+    variables:
+      - $NO_PRODUCTION
 
 backend_performance:
   stage: tests_on_staging
@@ -156,6 +162,7 @@ backend_performance:
   except:
     variables:
       - $IS_NODE_PROJECT
+      - $NO_PRODUCTION
 
 front_performance:
   stage: tests_on_production
@@ -176,6 +183,9 @@ front_performance:
       - master
     variables:
       - $IS_NODE_PROJECT
+  except:
+    variables:
+      - $NO_PRODUCTION
 
 # ---------------------------------------------------------------------------
 
