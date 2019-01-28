@@ -107,6 +107,9 @@ staging:
   only:
     refs:
       - master
+  except:
+    variables:
+      - $NO_STAGING
 
 production:
   stage: production
