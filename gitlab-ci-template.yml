@@ -253,23 +253,26 @@ front_performance:
   function deploy() {
     export CI_APPLICATION_REPOSITORY=$CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG
     export CI_APPLICATION_TAG=$(getApplicationTag)
+    export CHART_DIR=$(getChartDir)
 
     ln -s /mnt/cache/.ssh /root/.ssh
     git clone $CHART_REPO_URL
 
     TMP=`mktemp`
-    cat ${CHART_REPO_NAME}/versions-${CI_ENVIRONMENT_SLUG}.yaml | tr '\n' '|' | sed -e "s#$CHART_NAME:|  tag:[^|]*|#$CHART_NAME:|  tag: $CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG|#" | tr '|' '\n' > $TMP
-    mv $TMP ${CHART_REPO_NAME}/versions-${CI_ENVIRONMENT_SLUG}.yaml
-    (cd ${CHART_REPO_NAME}; git add versions-${CI_ENVIRONMENT_SLUG}.yaml; git -c user.name="$GITLAB_USER_LOGIN" -c user.email="$GITLAB_USER_EMAIL" commit -m "[${CI_ENVIRONMENT_SLUG}] ${CHART_NAME}.tag=${CI_APPLICATION_TAG}" || true; git push;)
+    cat ${CHART_DIR}/versions-${CI_ENVIRONMENT_SLUG}.yaml | tr '\n' '|' | sed -e "s#$CHART_NAME:|  tag:[^|]*|#$CHART_NAME:|  tag: $CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG|#" | tr '|' '\n' > $TMP
+    mv $TMP ${CHART_DIR}/versions-${CI_ENVIRONMENT_SLUG}.yaml
+    (cd ${CHART_DIR}; git add versions-${CI_ENVIRONMENT_SLUG}.yaml; git -c user.name="$GITLAB_USER_LOGIN" -c user.email="$GITLAB_USER_EMAIL" commit -m "[${CI_ENVIRONMENT_SLUG}] ${CHART_NAME}.tag=${CI_APPLICATION_TAG}" || true; git push;)
 
     helm init --client-only
-    helm dependency update --debug --tiller-namespace="$TILLER_NAMESPACE" ${CHART_REPO_NAME}
-    helm dependency build --debug --tiller-namespace="$TILLER_NAMESPACE" ${CHART_REPO_NAME}
+    helm dependency update --debug --tiller-namespace="$TILLER_NAMESPACE" ${CHART_DIR}
+    helm dependency build --debug --tiller-namespace="$TILLER_NAMESPACE" ${CHART_DIR}
 
-    helm upgrade --install --debug --wait --namespace="$KUBE_NAMESPACE" --tiller-namespace="$TILLER_NAMESPACE" \
-      -f ${CHART_REPO_NAME}/values-${CI_ENVIRONMENT_SLUG}.yaml \
-      -f ${CHART_REPO_NAME}/versions-${CI_ENVIRONMENT_SLUG}.yaml \
-      "${APP_NAME}-${CI_ENVIRONMENT_SLUG}" ${CHART_REPO_NAME}/
+    helm upgrade --install --debug --wait \
+      --namespace="$KUBE_NAMESPACE" \
+      --tiller-namespace="$TILLER_NAMESPACE" \
+      -f ${CHART_DIR}/values-${CI_ENVIRONMENT_SLUG}.yaml \
+      -f ${CHART_DIR}/versions-${CI_ENVIRONMENT_SLUG}.yaml \
+      "${APP_NAME}-${CI_ENVIRONMENT_SLUG}" ${CHART_DIR}/
   }
 
   function front_performance() {
@@ -299,6 +302,10 @@ front_performance:
   function getApplicationTag() {
     git show -s --format=%cd-%h --date=format:'%Y%m%d%H%M%S' $CI_COMMIT_SHA
   }
+
+  function getChartDir() {
+      echo "${CHART_REPO_NAME}/${APP_NAME}"
+    }
 
 before_script:
   - *auto_devops
