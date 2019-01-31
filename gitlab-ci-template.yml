@@ -201,8 +201,8 @@ review:
     - prepare_deploy
     - deploy_review
   environment:
-    name: review/$CI_COMMIT_REF_SLUG
-    url: https://${APP_NAME}-${CI_ENVIRONMENT_SLUG}-front.${AUTO_DEVOPS_DOMAIN}
+    name: review/$CI_COMMIT_SHORT_SHA
+    url: https://review-${CI_COMMIT_SHORT_SHA}-${APP_NAME}-${CI_ENVIRONMENT_SLUG}-front.${AUTO_DEVOPS_DOMAIN}
     on_stop: stop_review
   only:
     refs:
@@ -367,8 +367,8 @@ stop_review:
       --namespace="$KUBE_NAMESPACE" \
       --tiller-namespace="$TILLER_NAMESPACE" \
       --set ${CHART_NAME}.tag="${CI_APPLICATION_REPOSITORY}:${CI_APPLICATION_TAG}" \
-      --set global.envPrefix="review-${CI_COMMIT_REF_SLUG}" \
-      --set envPrefix="review${CI_COMMIT_REF_SLUG}" \
+      --set global.envPrefix="review-${CI_COMMIT_SHORT_SHA}" \
+      --set global.frontAppUrl="" \
       -f ${CHART_DIR}/values-staging.yaml \
       -f ${CHART_DIR}/versions-staging.yaml \
       "${APP_NAME}-${CI_ENVIRONMENT_SLUG}" ${CHART_DIR}/
