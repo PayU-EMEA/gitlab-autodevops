@@ -201,7 +201,7 @@ review:
     - prepare_deploy
     - deploy_review
   environment:
-    name: review/$CI_COMMIT_REF_NAME
+    name: review/$CI_COMMIT_REF_SLUG
     url: https://${APP_NAME}-${CI_ENVIRONMENT_SLUG}-front.${AUTO_DEVOPS_DOMAIN}
     on_stop: stop_review
   only:
@@ -221,7 +221,7 @@ stop_review:
     - prepare_deploy
     - delete_review
   environment:
-    name: review/$CI_COMMIT_REF_NAME
+    name: review/$CI_COMMIT_REF_SLUG
     action: stop
   when: manual
   allow_failure: true
