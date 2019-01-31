@@ -367,6 +367,8 @@ stop_review:
       --namespace="$KUBE_NAMESPACE" \
       --tiller-namespace="$TILLER_NAMESPACE" \
       --set ${CHART_NAME}.tag="${CI_APPLICATION_REPOSITORY}:${CI_APPLICATION_TAG}" \
+      --set global.envPrefix="review-${CI_COMMIT_REF_SLUG}" \
+      --set envPrefix="review${CI_COMMIT_REF_SLUG}" \
       -f ${CHART_DIR}/values-staging.yaml \
       -f ${CHART_DIR}/versions-staging.yaml \
       "${APP_NAME}-${CI_ENVIRONMENT_SLUG}" ${CHART_DIR}/
